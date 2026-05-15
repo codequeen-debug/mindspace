@@ -162,8 +162,10 @@ export default function JournalScreen() {
 
   const allEntries = [...firebaseEntries, ...localEntries]
 
+    return () => unsubscribe();
+  }, []);
 
-  // Break timer
+  // --- BREAK TIMER EFFECT ---
   useEffect(() => {
     if (breakActive) {
       breakRef.current = setInterval(() => {
