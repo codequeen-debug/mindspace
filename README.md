@@ -50,8 +50,9 @@ Then open http://localhost:5173
 npm run build
 npm run preview
 ```
-
 ## Project Structure
+
+```text
 src/
 ├── main.jsx             # Application entry point
 ├── App.jsx              # Main shell, providers, and routing logic
@@ -69,6 +70,7 @@ src/
 │   └── JournalScreen.jsx
 └── data/                # Static data and local assets
     └── journalEntries.jsx
+```
 
 ## System Architecture
 MindSpace uses a **Firebase Backend-as-a-Service (BaaS)** architecture.
@@ -82,13 +84,39 @@ We selected Firebase because:
 - Enables future authentication and notifications
 
 ### Architecture
-User Interface (React + Vite)
-            ↓
-     Firebase Firestore
-            ↓
-     Real-Time Data Updates
-            ↓
- Journals / Tasks / User Data
+```text
++----------------------+
+|      End User        |
+|   (College Student)  |
++----------+-----------+
+           |
+           v
++----------------------+
+| React + Vite UI      |
+| (Frontend Layer)     |
+| - Planner Screen     |
+| - Journal Screen     |
+| - Focus Screen       |
+| - Home Dashboard     |
++----------+-----------+
+           |
+           v
++----------------------+
+| Firebase Firestore   |
+| (Backend Service)    |
+| - Journal Storage    |
+| - Task Storage       |
+| - Real-Time Sync     |
++----------+-----------+
+           |
+           v
++----------------------+
+| Real-Time Updates    |
+| - Live journal sync  |
+| - Task updates       |
+| - Data persistence   |
++----------------------+
+```
  
 ## Design System
 Colours, spacing, and typography are all defined as CSS custom properties in `index.css`.
