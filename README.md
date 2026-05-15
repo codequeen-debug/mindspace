@@ -1,6 +1,34 @@
-# MindSpace 🌿
-
+# MindSpace
 A mindfulness app built with Vite + React, based on the FHCC Figma prototype.
+
+## Problem Statement
+College students often experience overwhelming levels of stress, anxiety, and disorganisation due to demanding coursework, deadlines, extracurricular activities, and personal responsibilities. Many existing productivity applications focus only on task completion and neglect emotional well-being. **MindSpace** was created to address this problem by combining productivity tools with wellness-centred design to help students stay organised while supporting mental balance.
+
+---
+## Motivation / User Story
+### User Story
+**Derrick** is a college student who feels mentally scattered and overwhelmed during busy academic periods. Between assignments, exams, and personal stress, he struggles to stay organised and frequently feels emotionally drained. After repeatedly reaching out to his Resident Assistant (**Rich-Ann**) for support, a solution was imagined: an app that combines organisation, reflection, and wellness into one calming experience.
+**MindSpace helps students like Derrick manage academic responsibilities while promoting mental wellness and healthy habits.**
+
+---
+## Moore’s Vision Template
+**For** college students who struggle with organisation and stress,  
+**who** need a calming and productive way to manage daily responsibilities,  
+**MindSpace** is a wellness-focused productivity application  
+**that** combines journaling, task management, and soothing design to support mental well-being and academic success.  
+**Unlike** traditional productivity apps that focus only on efficiency,  
+**Our product** promotes emotional wellness through reflection, organisation, and a calming user experience.
+
+---
+
+## Target Users
+MindSpace is designed for:
+- College students experiencing academic stress
+- Students balancing multiple responsibilities
+- Individuals seeking better organisation and emotional wellness
+- Students who want a private, calming productivity space
+
+---
 
 ## Features
 
