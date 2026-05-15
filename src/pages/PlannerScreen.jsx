@@ -24,10 +24,14 @@ function buildCalendarDays(month, year) {
   return days
 }
 
-function isToday(date) {
-  return date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
+function normalizeDate(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
+}
+
+function isSameDay(d1, d2) {
+  return d1.getDate() === d2.getDate() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getFullYear() === d2.getFullYear()
 }
 
 function ChevronLeft() {
@@ -57,6 +61,11 @@ export default function PlannerScreen() {
   const { planner } = state
   const [newTitle, setNewTitle] = useState('')
   const [newDuration, setNewDuration] = useState('')
+  const [newDate, setNewDate] = useState(normalizeDate(planner.selectedDate))
+  const [editingTask, setEditingTask] = useState(null)
+  const [editTitle, setEditTitle] = useState('')
+  const [editDuration, setEditDuration] = useState('')
+  const [editDate, setEditDate] = useState(null)
   const [menuTarget, setMenuTarget] = useState(null)
 
   const days = buildCalendarDays(planner.currentMonth, planner.currentYear)
@@ -67,17 +76,37 @@ export default function PlannerScreen() {
     dispatch({ type: 'PLANNER_SHOW_MENU', val: true })
   }
 
-  function handleAddTask() {
-    if (!newTitle.trim()) return
-    dispatch({ type: 'ADD_TASK', title: newTitle.trim(), duration: newDuration.trim() })
+  function openAddModal() {
+    setNewDate(normalizeDate(planner.selectedDate))
     setNewTitle('')
     setNewDuration('')
+    dispatch({ type: 'PLANNER_SHOW_ADD', val: true })
+  }
+
+  function handleAddTask() {
+    if (!newTitle.trim()) return
+    dispatch({ type: 'ADD_TASK', title: newTitle.trim(), duration: newDuration.trim(), dueDate: normalizeDate(newDate) })
+    setNewTitle('')
+    setNewDuration('')
+    setNewDate(normalizeDate(planner.selectedDate))
+  }
+
+  function handleEditTask() {
+    if (!editTitle.trim() || !editingTask) return
+    dispatch({ type: 'UPDATE_TASK', id: editingTask.id, title: editTitle.trim(), duration: editDuration.trim(), dueDate: normalizeDate(editDate) })
+    setEditingTask(null)
+    setEditTitle('')
+    setEditDuration('')
+    setEditDate(null)
   }
 
   return (
-    <div className="planner-screen screen-enter">
+    <div className="planner-screen">
       {/* Header */}
       <div className="page-header">
+        <button className="back-btn" onClick={() => dispatch({ type: 'SET_TAB', tab: 'home' })}>
+          <ChevronLeft />
+        </button>
         <h1>Daily Planner</h1>
         <div className="header-actions">
           <button className="icon-btn" onClick={() => dispatch({ type: 'PLANNER_SHOW_MENU', val: true })}>
@@ -105,7 +134,7 @@ export default function PlannerScreen() {
           {days.map((d, i) => (
             <div
               key={i}
-              className={`cal-day ${!d.currentMonth ? 'other-month' : ''} ${isToday(d.date) ? 'today' : ''}`}
+              className={`cal-day ${!d.currentMonth ? 'other-month' : ''} ${isSameDay(d.date, today) ? 'today' : ''} ${isSameDay(d.date, planner.selectedDate) ? 'selected-day' : ''}`}
               onClick={() => dispatch({ type: 'PLANNER_SELECT_DATE', date: d.date })}
             >
               {d.day}
@@ -116,32 +145,47 @@ export default function PlannerScreen() {
 
       {/* Task List */}
       <div className="tasks-section">
-        {planner.tasks.map(task => (
+        <div className="tasks-header">
+          <div>
+            <p className="tasks-label">Tasks for</p>
+            <p className="tasks-date">{planner.selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+          </div>
+          <button className="add-date-btn" onClick={openAddModal}>New task</button>
+        </div>
+        {planner.tasks.filter(task => isSameDay(task.dueDate, planner.selectedDate)).map(task => (
           <div
             key={task.id}
             className="task-item"
-            onContextMenu={(e) => handleTaskRightClick(e, task.id)}
           >
             <div
               className={`task-checkbox ${task.done ? 'checked' : ''}`}
               onClick={() => dispatch({ type: 'TOGGLE_TASK', id: task.id })}
             />
             <div className="task-content">
-              <span className="task-title" style={task.done ? { textDecoration: 'line-through', opacity: 0.5 } : {}}>
-                {task.title}
-              </span>
-              {task.duration && <span className="task-duration">{task.duration}</span>}
+              <div className="task-main">
+                <span className="task-title" style={task.done ? { textDecoration: 'line-through', opacity: 0.5 } : {}}>
+                  {task.title}
+                </span>
+                {task.duration && <span className="task-duration">{task.duration}</span>}
+              </div>
+              <span className="task-date-label">Due {task.dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+            <div className="task-actions">
+              <button className="icon-btn small" onClick={() => {
+                setEditingTask(task)
+                setEditTitle(task.title)
+                setEditDuration(task.duration || '')
+                setEditDate(task.dueDate)
+                dispatch({ type: 'PLANNER_SHOW_EDIT', val: true })
+              }}>
+                <CalIcon />
+              </button>
+              <button className="icon-btn small danger" onClick={() => dispatch({ type: 'DELETE_TASK', id: task.id })}>
+                <TrashIcon />
+              </button>
             </div>
           </div>
         ))}
-
-        {/* Add task */}
-        <div className="add-task-bar" onClick={() => dispatch({ type: 'PLANNER_SHOW_ADD', val: true })}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" width="18" height="18">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add a task
-        </div>
       </div>
 
       {/* Context Menu */}
@@ -169,8 +213,19 @@ export default function PlannerScreen() {
               </div>
             </button>
             {/* Edit */}
-            <button className="context-item">
-              <span className="context-item-label">Edit Tasks</span>
+            <button className="context-item" onClick={() => {
+              if (menuTarget) {
+                const task = planner.tasks.find(t => t.id === menuTarget)
+                if (task) {
+                  setEditingTask(task)
+                  setEditTitle(task.title)
+                  setEditDuration(task.duration || '')
+                  dispatch({ type: 'PLANNER_SHOW_EDIT', val: true })
+                }
+              }
+              dispatch({ type: 'PLANNER_SHOW_MENU', val: false })
+            }}>
+              <span className="context-item-label">Edit Task</span>
               <CalIcon />
             </button>
             {/* Delete */}
@@ -204,12 +259,57 @@ export default function PlannerScreen() {
               value={newDuration}
               onChange={e => setNewDuration(e.target.value)}
             />
+            <label className="modal-label">Due Date</label>
+            <input
+              className="modal-input"
+              type="date"
+              value={newDate.toISOString().slice(0, 10)}
+              onChange={e => setNewDate(normalizeDate(new Date(e.target.value)))}
+            />
             <div className="modal-actions">
               <button className="modal-btn cancel" onClick={() => dispatch({ type: 'PLANNER_SHOW_ADD', val: false })}>
                 Cancel
               </button>
               <button className="modal-btn confirm" onClick={handleAddTask}>
                 Add Task
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Task Sheet */}
+      {planner.showEditTask && editingTask && (
+        <div className="add-modal" onClick={() => dispatch({ type: 'PLANNER_SHOW_EDIT', val: false })}>
+          <div className="add-modal-sheet" onClick={e => e.stopPropagation()}>
+            <h3>Edit Task</h3>
+            <input
+              className="modal-input"
+              placeholder="Task name"
+              value={editTitle}
+              onChange={e => setEditTitle(e.target.value)}
+              autoFocus
+              onKeyDown={e => e.key === 'Enter' && handleEditTask()}
+            />
+            <input
+              className="modal-input"
+              placeholder="Duration (optional, e.g. 30 mins)"
+              value={editDuration}
+              onChange={e => setEditDuration(e.target.value)}
+            />
+            <label className="modal-label">Due Date</label>
+            <input
+              className="modal-input"
+              type="date"
+              value={editDate ? editDate.toISOString().slice(0, 10) : ''}
+              onChange={e => setEditDate(normalizeDate(new Date(e.target.value)))}
+            />
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => dispatch({ type: 'PLANNER_SHOW_EDIT', val: false })}>
+                Cancel
+              </button>
+              <button className="modal-btn confirm" onClick={handleEditTask}>
+                Save Changes
               </button>
             </div>
           </div>

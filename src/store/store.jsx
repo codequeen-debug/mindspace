@@ -1,17 +1,63 @@
-import { createContext, useContext, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer } from 'react'
 
+const STORAGE_KEY = 'mindspaceState'
 const today = new Date()
+const tomorrow = new Date(today)
+tomorrow.setDate(today.getDate() + 1)
+const dayAfter = new Date(today)
+dayAfter.setDate(today.getDate() + 2)
+
+function parseState(raw) {
+  if (!raw) return null
+  try {
+    const state = JSON.parse(raw)
+    const planner = state.planner || {}
+    const tasks = Array.isArray(planner.tasks)
+      ? planner.tasks.map((task) => ({
+          ...task,
+          dueDate: task?.dueDate ? new Date(task.dueDate) : today,
+        }))
+      : []
+
+    return {
+      ...state,
+      planner: {
+        ...planner,
+        tasks,
+        selectedDate: planner.selectedDate ? new Date(planner.selectedDate) : today,
+      },
+    }
+  } catch {
+    return null
+  }
+}
+
+function serializeState(state) {
+  return JSON.stringify({
+    ...state,
+    planner: {
+      ...state.planner,
+      selectedDate: state.planner.selectedDate instanceof Date ? state.planner.selectedDate.toISOString() : state.planner.selectedDate,
+      tasks: state.planner.tasks.map((task) => ({
+        ...task,
+        dueDate: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate,
+      })),
+    },
+  })
+}
 
 const initialState = {
-  activeTab: 'home',
+  activeTab: 'landing',
 
   planner: {
     tasks: [
-      { id: 1, title: 'Go to Classes', duration: null, done: false },
-      { id: 2, title: 'Study Session', duration: '2hrs', done: false },
-      { id: 3, title: 'Take a walk', duration: '20 mins', done: false },
-      { id: 4, title: 'Do some self-care & EAT', duration: '1-2 hrs', done: false },
-      { id: 5, title: 'Go to Gym', duration: '1 hr', done: false },
+      { id: 1, title: 'Go to Classes', duration: null, done: false, dueDate: today },
+      { id: 2, title: 'Study Session', duration: '2hrs', done: false, dueDate: today },
+      { id: 3, title: 'Take a walk', duration: '20 mins', done: false, dueDate: today },
+      { id: 4, title: 'Do some self-care & EAT', duration: '1-2 hrs', done: false, dueDate: today },
+      { id: 5, title: 'Go to Gym', duration: '1 hr', done: false, dueDate: today },
+      { id: 6, title: 'Study for exam', duration: '2 hrs', done: false, dueDate: tomorrow },
+      { id: 7, title: 'Call mom', duration: null, done: false, dueDate: dayAfter },
     ],
     selectedDate: today,
     currentMonth: today.getMonth(),
@@ -19,6 +65,7 @@ const initialState = {
     sortBy: 'Entry Date',
     showMenu: false,
     showAddTask: false,
+    showEditTask: false,
   },
 
   focus: {
@@ -50,6 +97,9 @@ const initialState = {
     sortBy: 'Entry Date',
     showMenu: false,
     locked: false,
+  },
+  chat: {
+    messages: [],
   },
 }
 
@@ -87,9 +137,22 @@ function reducer(state, action) {
               title: action.title,
               duration: action.duration || null,
               done: false,
+              dueDate: action.dueDate || state.planner.selectedDate,
             },
           ],
           showAddTask: false,
+        },
+      }
+
+    case 'UPDATE_TASK':
+      return {
+        ...state,
+        planner: {
+          ...state.planner,
+          tasks: state.planner.tasks.map((t) =>
+            t.id === action.id ? { ...t, title: action.title, duration: action.duration || null, dueDate: action.dueDate || t.dueDate } : t
+          ),
+          showEditTask: false,
         },
       }
 
@@ -147,6 +210,12 @@ function reducer(state, action) {
         planner: { ...state.planner, showAddTask: action.val },
       }
 
+    case 'PLANNER_SHOW_EDIT':
+      return {
+        ...state,
+        planner: { ...state.planner, showEditTask: action.val },
+      }
+
     case 'PLANNER_SET_SORT':
       return {
         ...state,
@@ -156,6 +225,34 @@ function reducer(state, action) {
           showMenu: false,
         },
       }
+
+    case 'CHAT_SEND_MESSAGE': {
+      const message = {
+        id: Date.now(),
+        senderId: action.senderId,
+        text: action.text,
+        createdAt: new Date().toISOString(),
+      }
+
+      const therapistReply = state.chat.messages.length === 0 && action.senderId !== 'therapist_1'
+        ? {
+            id: Date.now() + 1,
+            senderId: 'therapist_1',
+            text: 'Hi there! I’m here to listen. How can I support you today?',
+            createdAt: new Date(Date.now() + 1000).toISOString(),
+          }
+        : null
+
+      return {
+        ...state,
+        chat: {
+          ...state.chat,
+          messages: therapistReply
+            ? [...state.chat.messages, message, therapistReply]
+            : [...state.chat.messages, message],
+        },
+      }
+    }
 
     // ================= FOCUS =================
     case 'UPDATE_SAVERS':
@@ -270,8 +367,20 @@ function reducer(state, action) {
 
 const StoreContext = createContext(null)
 
+function initState(initial) {
+  if (typeof window === 'undefined') return initial
+  const stored = localStorage.getItem(STORAGE_KEY)
+  const parsed = parseState(stored)
+  return parsed || initial
+}
+
 export function StoreProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const [state, dispatch] = useReducer(reducer, initialState, initState)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(STORAGE_KEY, serializeState(state))
+  }, [state])
 
   return (
     <StoreContext.Provider value={{ state, dispatch }}>

@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useStore } from '../store/store'
 
 export default function StatusBar() {
   const [time, setTime] = useState('')
   const [battery, setBattery] = useState({ level: 1, charging: false })
+  const { currentUser, logout } = useAuth()
+  const { dispatch } = useStore()
+  const setTab = (tab) => dispatch({ type: 'SET_TAB', tab })
+
+  async function handleLogout() {
+    try {
+      await logout()
+      setTab('landing')
+    } catch (err) {
+      console.error('Logout error:', err)
+    }
+  }
 
   // --- Time via World Time API ---
   useEffect(() => {
@@ -77,11 +91,7 @@ export default function StatusBar() {
   const batteryFillWidth = Math.round(battery.level * 18) // max 18px inside the rect
 
   return (
-<<<<<<< HEAD
-    <div className="status-bar">
-=======
     <div className="status-bar" data-testid="status-bar">
->>>>>>> main
       <span>{time}</span>
       <div className="status-icons">
 
@@ -123,6 +133,28 @@ export default function StatusBar() {
             />
           )}
         </svg>
+
+        {/* Logout button for authenticated users */}
+        {currentUser && (
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'currentColor',
+              cursor: 'pointer',
+              padding: '2px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              opacity: 0.7
+            }}
+            onMouseEnter={(e) => e.target.style.opacity = '1'}
+            onMouseLeave={(e) => e.target.style.opacity = '0.7'}
+            title="Logout"
+          >
+            ↗
+          </button>
+        )}
 
       </div>
     </div>

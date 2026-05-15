@@ -1,22 +1,25 @@
 :root {
-  --bg-primary: #7fafc4;
-  --bg-secondary: #6b9ab5;
-  --bg-navbar: #4a7a8a;
-  --bg-card: rgba(255,255,255,0.18);
-  --bg-card-solid: #b8d4e0;
-  --bg-input: rgba(180, 215, 230, 0.55);
-  --bg-modal: #2e2e3e;
-  --bg-modal-item: #38384a;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255,255,255,0.75);
-  --text-dark: #1a2530;
-  --text-danger: #e03030;
-  --accent-calendar: #9b8ec4;
-  --accent-calendar-bg: #c8bee8;
-  --border-subtle: rgba(255,255,255,0.2);
-  --border-card: rgba(255,255,255,0.3);
-  --shadow-soft: 0 4px 24px rgba(0,0,0,0.12);
-  --shadow-card: 0 2px 12px rgba(0,0,0,0.10);
+  --bg-gradient: linear-gradient(135deg, #87CEEB 0%, #E0F6FF 50%, #F0F8FF 100%);
+  --bg-primary: #87CEEB;
+  --bg-secondary: #B0D9F0;
+  --bg-navbar: rgba(74, 144, 226, 0.85);
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card-solid: rgba(255, 255, 255, 0.85);
+  --bg-input: rgba(255, 255, 255, 0.6);
+  --bg-modal: rgba(255, 255, 255, 0.9);
+  --bg-modal-item: rgba(74, 144, 226, 0.1);
+  --text-primary: #2E4A62;
+  --text-secondary: #5A7A92;
+  --text-dark: #0D2D45;
+  --text-danger: #D63031;
+  --accent-primary: #4A90E2;
+  --accent-secondary: #357ABD;
+  --accent-calendar: #7EC3E8;
+  --accent-calendar-bg: #C8E6F5;
+  --border-subtle: rgba(74, 144, 226, 0.2);
+  --border-card: rgba(74, 144, 226, 0.15);
+  --shadow-soft: 0 4px 24px rgba(74, 144, 226, 0.15);
+  --shadow-card: 0 2px 12px rgba(74, 144, 226, 0.1);
   --radius-card: 20px;
   --radius-btn: 14px;
   --nav-height: 72px;
@@ -37,7 +40,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-body);
-  background: #3a6070;
+  background: var(--bg-gradient);
   overflow: auto;
   min-height: 100vh;
 }
@@ -46,14 +49,14 @@ body {
 .phone-shell {
   width: 390px;
   height: 844px;
-  background: var(--bg-primary);
+  background: var(--bg-gradient);
   border-radius: 44px;
   overflow: hidden;
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  box-shadow: 0 32px 80px rgba(0,0,0,0.45), 0 0 0 2px rgba(255,255,255,0.08);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.2);
   display: flex;
   flex-direction: column;
 }
@@ -67,7 +70,7 @@ body {
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-dark);
   flex-shrink: 0;
   position: relative;
   z-index: 10;
@@ -77,6 +80,7 @@ body {
   display: flex;
   gap: 6px;
   align-items: center;
+  color: var(--text-dark);
 }
 
 /* Screen content */
@@ -113,7 +117,7 @@ body {
   padding: 8px 20px;
   border-radius: 12px;
   transition: background 0.18s, transform 0.15s;
-  color: rgba(255,255,255,0.65);
+  color: rgba(13, 45, 69, 0.5);
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 500;
@@ -124,7 +128,8 @@ body {
 }
 
 .nav-item.active {
-  color: #ffffff;
+  color: #0D2D45;
+  font-weight: 700;
 }
 
 .nav-item:hover { transform: scale(1.05); }
@@ -134,7 +139,7 @@ body {
 .home-indicator {
   width: 130px;
   height: 5px;
-  background: rgba(255,255,255,0.3);
+  background: rgba(13, 45, 69, 0.2);
   border-radius: 3px;
   margin: 0 auto;
   position: absolute;
@@ -155,7 +160,7 @@ body {
   font-family: var(--font-display);
   font-size: 30px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-dark);
   letter-spacing: -0.03em;
 }
 
@@ -168,7 +173,7 @@ body {
 .icon-btn {
   background: none;
   border: none;
-  color: var(--text-primary);
+  color: var(--text-dark);
   cursor: pointer;
   padding: 4px;
   border-radius: 8px;
@@ -177,7 +182,7 @@ body {
   justify-content: center;
   transition: opacity 0.15s, background 0.15s;
 }
-.icon-btn:hover { opacity: 0.8; background: rgba(255,255,255,0.1); }
+.icon-btn:hover { opacity: 0.7; background: rgba(74, 144, 226, 0.2); }
 
 /* Back header */
 .back-header {
@@ -210,7 +215,7 @@ body {
 .home-logo-icon svg {
   width: 64px;
   height: 64px;
-  stroke: white;
+  stroke: var(--text-dark);
   fill: none;
   stroke-width: 1.5;
 }
@@ -219,7 +224,7 @@ body {
   font-family: var(--font-display);
   font-size: 22px;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-dark);
   text-align: center;
   letter-spacing: -0.02em;
 }
@@ -432,6 +437,21 @@ body {
   font-size: 14px;
 }
 .add-task-bar:hover { background: rgba(255,255,255,0.35); }
+
+.add-date-btn {
+  background: #fff;
+  color: #0d2d45;
+  border: 1px solid rgba(13,45,69,0.15);
+  border-radius: 16px;
+  padding: 10px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-date-btn:hover {
+  background: #f1f7ff;
+}
 
 /* ===== FOCUS SCREEN ===== */
 .focus-screen {

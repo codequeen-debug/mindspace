@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isStudent() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'student';
+    }
+
+    function isTherapist() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'therapist';
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function canAccessTherapistData(therapistId) {
+      return isAuthenticated() &&
+             (request.auth.uid == therapistId ||
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.assignedTherapist == therapistId);
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin() || (isTherapist() && canAccessTherapistData(userId)));
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Journals collection
+    match /journals/{journalId} {
+      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Tasks collection
+    match /tasks/{taskId} {
+      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Chats collection
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() &&
+                     (resource.data.studentId == request.auth.uid ||
+                      resource.data.therapistId == request.auth.uid);
+      allow write: if isAuthenticated() &&
+                      (request.auth.uid == request.resource.data.studentId ||
+                       request.auth.uid == request.resource.data.therapistId);
+      allow create: if isAuthenticated() &&
+                       (request.auth.uid == request.resource.data.studentId ||
+                        request.auth.uid == request.resource.data.therapistId);
+    }
+  }
+}
