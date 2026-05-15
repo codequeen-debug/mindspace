@@ -1,7 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
+//import { db } from '../firebase'
+import { journalEntries } from '../data/journalEntries'
+import { useStore } from '../store/store'
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  doc,
+  deleteDoc,
+  updateDoc,
+  serverTimestamp
+} from 'firebase/firestore'
 
-
-// ── Icons ────────────────────────────────────────────────────────────────────
+// ── ICONS ─────────────────────────────────────────────────────────────────────
 function ArrowLeftIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
@@ -10,13 +23,17 @@ function ArrowLeftIcon() {
     </svg>
   )
 }
+
 function DotsIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-      <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
     </svg>
   )
 }
+
 function LockOpenIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -26,6 +43,7 @@ function LockOpenIcon() {
     </svg>
   )
 }
+
 function LockIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -35,14 +53,17 @@ function LockIcon() {
     </svg>
   )
 }
+
 function SearchIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-      <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
     </svg>
   )
 }
+
 function PencilIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -52,6 +73,7 @@ function PencilIcon() {
     </svg>
   )
 }
+
 function TrashIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -62,6 +84,25 @@ function TrashIcon() {
     </svg>
   )
 }
+
+function SunIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" width="16" height="16">
+      <circle cx="12" cy="12" r="4" />
+    </svg>
+  )
+}
+
+function MoonIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" width="15" height="15">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  )
+}
+
 function FlameIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -70,6 +111,7 @@ function FlameIcon() {
     </svg>
   )
 }
+
 function BookIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
@@ -79,84 +121,143 @@ function BookIcon() {
     </svg>
   )
 }
-function SunIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-      strokeLinecap="round" width="16" height="16">
-      <circle cx="12" cy="12" r="4" />
-      <line x1="12" y1="2" x2="12" y2="5" /><line x1="12" y1="19" x2="12" y2="22" />
-      <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" /><line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
-      <line x1="2" y1="12" x2="5" y2="12" /><line x1="19" y1="12" x2="22" y2="12" />
-      <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" /><line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
-    </svg>
-  )
-}
-function MoonIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round" width="15" height="15">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  )
-}
+
 function CalendarIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+      <rect x="3" y="4" width="18" height="18" rx="2" />
     </svg>
   )
 }
+
 function TargetIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-      <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
+      <circle cx="12" cy="12" r="10" />
     </svg>
   )
 }
+
 function NotebookIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
       <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />
-      <path d="M8 7h8M8 11h6" />
     </svg>
   )
 }
 
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-const MOODS = ['Happy', 'Calm', 'Anxious', 'Sad', 'Grateful', 'Tired']
-const MAX_CHARS = 280
-
-
-function formatDate(d = new Date()) {
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+function ChatIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  )
 }
 
+function SendIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </svg>
+  )
+}
 
-// ── Main Component ────────────────────────────────────────────────────────────
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" width="18" height="18">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────────
+const MOODS = ['Happy', 'Calm', 'Anxious', 'Sad', 'Grateful', 'Tired']
+const MAX_CHARS = 280
+const STORAGE_KEY = 'journal_lock_password'
+
+const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY
+
+const THERAPIST_SYSTEM = `You are Sage, a warm wellness companion.
+Respond empathetically in 2-4 sentences.
+Never diagnose mental illness.
+Encourage professional support for serious concerns.`
+
+// ── MAIN COMPONENT ────────────────────────────────────────────────────────────
 export default function JournalScreen() {
-  const [entries, setEntries] = useState([
-    { id: 1, date: 'Nov 12, 2025', text: 'Today was a good day. I felt really productive and managed to complete most of my tasks.', mood: 'Happy' },
-    { id: 2, date: 'Nov 11, 2025', text: 'Had a rough morning but turned it around by going for a walk in the afternoon.', mood: 'Calm' },
-  ])
+  const { dispatch } = useStore()
+
+  const [firebaseEntries, setFirebaseEntries] = useState([])
+  const [localEntries, setLocalEntries] = useState([])
+
   const [text, setText] = useState('')
   const [selectedMood, setSelectedMood] = useState('Happy')
+
   const [locked, setLocked] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
-  const [editId, setEditId] = useState(null)
+
+  const [editTarget, setEditTarget] = useState(null)
   const [editText, setEditText] = useState('')
+
   const [search, setSearch] = useState('')
   const [sortAsc, setSortAsc] = useState(false)
+
   const [breakActive, setBreakActive] = useState(false)
   const [breakSeconds, setBreakSeconds] = useState(300)
+
+  const [deleteTarget, setDeleteTarget] = useState(null)
+
   const breakRef = useRef(null)
 
+  // CHAT
+  const [showChat, setShowChat] = useState(false)
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(1)
 
-  // Break timer
+  const chatEndRef = useRef(null)
+
+  // ── SEED LOCAL ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const seeded = journalEntries.map((entry, index) => ({
+      id: `local-${index}`,
+      text: entry.content,
+      mood: entry.mood,
+      isLocal: true,
+      date: entry.createdAt.toLocaleDateString()
+    }))
+
+    setLocalEntries(seeded)
+  }, [])
+
+  // ── FIREBASE LISTENER ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const q = query(collection(db, 'journals'), orderBy('createdAt', 'desc'))
+
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const docs = snapshot.docs.map(d => ({
+        id: d.id,
+        ...d.data(),
+        isLocal: false,
+        date:
+          d.data().createdAt?.toDate().toLocaleDateString() || 'Just now'
+      }))
+
+      setFirebaseEntries(docs)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  // ── BREAK TIMER ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (breakActive) {
       breakRef.current = setInterval(() => {
@@ -172,466 +273,388 @@ export default function JournalScreen() {
     } else {
       clearInterval(breakRef.current)
     }
+
     return () => clearInterval(breakRef.current)
   }, [breakActive])
 
+  // ── CHAT EFFECTS ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (showChat) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [chatMessages, showChat])
 
-  function toggleBreak() {
-    if (breakActive) {
-      setBreakActive(false)
-      setBreakSeconds(300)
-    } else {
-      setBreakSeconds(300)
-      setBreakActive(true)
+  useEffect(() => {
+    if (showChat && chatMessages.length === 0) {
+      setChatMessages([
+        {
+          role: 'therapist',
+          text: "Hi 🌿 I'm Sage. How are you feeling today?",
+          time: new Date().toLocaleTimeString()
+        }
+      ])
+
+      setUnreadCount(0)
+    }
+
+    if (showChat) {
+      setUnreadCount(0)
+    }
+  }, [showChat])
+
+  // ── SAVE ENTRY ──────────────────────────────────────────────────────────────
+  async function saveEntry() {
+    if (!text.trim()) return
+
+    await addDoc(collection(db, 'journals'), {
+      text: text.trim(),
+      mood: selectedMood,
+      createdAt: serverTimestamp()
+    })
+
+    setText('')
+  }
+
+  // ── CHAT ────────────────────────────────────────────────────────────────────
+  async function sendChatMessage() {
+    if (!chatInput.trim() || chatLoading) return
+
+    const userText = chatInput.trim()
+
+    setChatMessages(prev => [
+      ...prev,
+      {
+        role: 'user',
+        text: userText,
+        time: new Date().toLocaleTimeString()
+      }
+    ])
+
+    setChatInput('')
+    setChatLoading(true)
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: 'user',
+                parts: [
+                  {
+                    text: `${THERAPIST_SYSTEM}
+
+User message: ${userText}`
+                  }
+                ]
+              }
+            ]
+          })
+        }
+      )
+
+      const data = await res.json()
+
+      const reply =
+        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "I'm here for you."
+
+      setChatMessages(prev => [
+        ...prev,
+        {
+          role: 'therapist',
+          text: reply,
+          time: new Date().toLocaleTimeString()
+        }
+      ])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setChatLoading(false)
     }
   }
 
+  // ── HELPERS ─────────────────────────────────────────────────────────────────
+  const allEntries = [...firebaseEntries, ...localEntries]
+
+  const filtered = allEntries.filter(
+    e =>
+      e.text?.toLowerCase().includes(search.toLowerCase()) ||
+      e.mood?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const sorted = sortAsc ? [...filtered].reverse() : filtered
 
   function formatBreak(s) {
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
   }
 
+  async function confirmDelete() {
+    if (deleteTarget?.isLocal) {
+      setLocalEntries(prev =>
+        prev.filter(e => e.id !== deleteTarget.id)
+      )
+    } else {
+      await deleteDoc(doc(db, 'journals', deleteTarget.id))
+    }
 
-  function saveEntry() {
-    if (locked || !text.trim()) return
-    setEntries(prev => [
-      { id: Date.now(), date: formatDate(), text: text.trim(), mood: selectedMood },
-      ...prev,
-    ])
-    setText('')
+    setDeleteTarget(null)
   }
 
-
-  function deleteEntry(id) {
-    setEntries(prev => prev.filter(e => e.id !== id))
-  }
-
-
-  function openEdit(entry) {
-    setEditId(entry.id)
-    setEditText(entry.text)
-  }
-
-
-  function confirmEdit() {
+  async function confirmEdit() {
     if (!editText.trim()) return
-    setEntries(prev => prev.map(e => e.id === editId ? { ...e, text: editText.trim() } : e))
-    setEditId(null)
+
+    if (editTarget.isLocal) {
+      setLocalEntries(prev =>
+        prev.map(e =>
+          e.id === editTarget.id
+            ? { ...e, text: editText.trim() }
+            : e
+        )
+      )
+    } else {
+      await updateDoc(doc(db, 'journals', editTarget.id), {
+        text: editText.trim()
+      })
+    }
+
+    setEditTarget(null)
     setEditText('')
   }
 
-
-  function toggleSort() {
-    setSortAsc(a => !a)
-    setEntries(prev => [...prev].reverse())
-  }
-
-
-  const filtered = entries.filter(
-    e => e.text.toLowerCase().includes(search.toLowerCase()) ||
-         e.mood.toLowerCase().includes(search.toLowerCase())
-  )
-
-
+  // ── UI ──────────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* ── Global styles ── */}
       <style>{`
-        .journal-root {
-          background: linear-gradient(170deg, #b8d9f5 0%, #dbeeff 40%, #e8f4fd 70%, #f0f8ff 100%);
-          min-height: 100vh;
-          position: relative;
-          overflow-x: hidden;
-          font-family: var(--font-display, 'SF Pro Rounded', system-ui, sans-serif);
-        }
-        .cloud-shape {
-          position: absolute;
-          background: rgba(255,255,255,0.65);
-          border-radius: 50px;
-          pointer-events: none;
-        }
-        .cloud-shape::before, .cloud-shape::after {
-          content: '';
-          position: absolute;
-          background: rgba(255,255,255,0.65);
-          border-radius: 50%;
-        }
-        .cloud-a { width: 110px; height: 34px; top: 22px; left: 18px; }
-        .cloud-a::before { width: 56px; height: 48px; top: -22px; left: 14px; }
-        .cloud-a::after  { width: 38px; height: 36px; top: -14px; left: 48px; }
-        .cloud-b { width: 80px; height: 24px; top: 36px; right: 28px; opacity: 0.55; }
-        .cloud-b::before { width: 40px; height: 36px; top: -16px; left: 10px; }
-        .cloud-b::after  { width: 28px; height: 26px; top: -10px; left: 38px; }
-        .cloud-c { width: 60px; height: 18px; top: 220px; right: 12px; opacity: 0.4; }
-        .cloud-c::before { width: 32px; height: 28px; top: -12px; left: 8px; }
-
-
-        /* Header */
-        .j-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 18px 20px 8px;
-          position: relative;
-          z-index: 2;
-        }
-        .j-icon-btn {
-          background: rgba(255,255,255,0.55);
-          border: 1px solid rgba(255,255,255,0.85);
-          border-radius: 50%;
-          width: 38px; height: 38px;
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer;
-          color: #2a6fa8;
-          transition: background 0.15s;
-        }
-        .j-icon-btn:hover { background: rgba(255,255,255,0.85); }
-
-
-        /* Title */
-        .j-title {
-          padding: 4px 20px 0;
-          font-size: 30px;
-          font-weight: 800;
-          color: #1a4d7a;
-          line-height: 1.12;
-          position: relative; z-index: 2;
+        .jr {
+          min-height:100vh;
+          background:#dff1ff;
+          font-family:system-ui;
         }
 
-
-        /* Mood row */
-        .j-mood-row {
-          display: flex; align-items: center; gap: 7px;
-          padding: 10px 20px 6px;
-          color: #2a6fa8; font-size: 14px; font-weight: 500;
-          position: relative; z-index: 2;
-        }
-        .j-mood-chips {
-          display: flex; gap: 7px; flex-wrap: wrap;
-          padding: 0 20px 10px;
-          position: relative; z-index: 2;
-        }
-        .j-mood-chip {
-          background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(255,255,255,0.85);
-          border-radius: 20px;
-          padding: 4px 13px;
-          font-size: 12px;
-          color: #1a4d7a;
-          cursor: pointer;
-          transition: background 0.15s, font-weight 0.1s;
-        }
-        .j-mood-chip:hover { background: rgba(255,255,255,0.75); }
-        .j-mood-chip.active {
-          background: rgba(255,255,255,0.9);
-          font-weight: 700;
-          border-color: rgba(42,111,168,0.35);
+        .jr-hdr {
+          display:flex;
+          justify-content:space-between;
+          padding:20px;
         }
 
-
-        /* Streak badges */
-        .j-streak-row {
-          display: flex; gap: 8px; padding: 4px 20px 10px;
-          position: relative; z-index: 2;
-        }
-        .j-badge {
-          background: rgba(255,255,255,0.52);
-          border: 1px solid rgba(255,255,255,0.85);
-          border-radius: 14px;
-          padding: 5px 12px;
-          display: flex; align-items: center; gap: 6px;
-          font-size: 12px; color: #1a4d7a; font-weight: 600;
-        }
-        .j-badge svg { color: #e8a020; }
-
-
-        /* Lock banner */
-        .j-lock-banner {
-          margin: 0 16px 6px;
-          background: rgba(192,80,80,0.1);
-          border: 1px solid rgba(192,80,80,0.3);
-          border-radius: 12px;
-          padding: 8px 14px;
-          display: flex; align-items: center; gap: 8px;
-          font-size: 12px; color: #8a2020; font-weight: 500;
-          position: relative; z-index: 2;
+        .jr-ibtn {
+          width:40px;
+          height:40px;
+          border:none;
+          border-radius:50%;
+          background:white;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          position:relative;
         }
 
-
-        /* Textarea */
-        .j-textarea-wrap { margin: 0 16px; position: relative; z-index: 2; }
-        .j-textarea {
-          width: 100%;
-          height: 120px;
-          background: rgba(255,255,255,0.62);
-          border: 1.5px solid rgba(255,255,255,0.88);
-          border-radius: 18px;
-          padding: 14px 16px;
-          font-size: 14px;
-          color: #1a3d5c;
-          resize: none;
-          outline: none;
-          font-family: inherit;
-          transition: background 0.15s, border-color 0.15s;
-        }
-        .j-textarea::placeholder { color: #7ab4d4; }
-        .j-textarea:focus {
-          background: rgba(255,255,255,0.82);
-          border-color: rgba(90,160,220,0.6);
-        }
-        .j-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
-        .j-char-count {
-          text-align: right;
-          font-size: 11px;
-          color: #5a94c0;
-          margin-top: 4px;
-          padding-right: 4px;
-        }
-        .j-char-count.warn { color: #c05050; }
-
-
-        /* Save btn */
-        .j-btn-row { display: flex; gap: 8px; padding: 10px 16px 4px; position: relative; z-index: 2; }
-        .j-btn-save {
-          flex: 1;
-          background: rgba(42,111,168,0.82);
-          color: white;
-          border: none;
-          border-radius: 14px;
-          padding: 13px;
-          font-size: 14px; font-weight: 700;
-          cursor: pointer;
-          font-family: inherit;
-          transition: background 0.15s, transform 0.1s;
-        }
-        .j-btn-save:hover { background: rgba(26,77,122,0.9); }
-        .j-btn-save:active { transform: scale(0.98); }
-        .j-btn-save:disabled {
-          background: rgba(150,195,225,0.45);
-          color: rgba(255,255,255,0.55);
-          cursor: not-allowed;
+        .jr-chat-badge {
+          position:absolute;
+          top:-4px;
+          right:-4px;
+          background:red;
+          color:white;
+          width:18px;
+          height:18px;
+          border-radius:50%;
+          font-size:10px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
         }
 
+        .jr-title {
+          font-size:30px;
+          font-weight:800;
+          padding:0 20px;
+          color:#0d2d45;
+        }
 
-        /* Break banner */
-        .j-break-banner {
-          margin: 10px 16px;
-          background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(255,255,255,0.88);
-          border-radius: 50px;
-          display: flex; align-items: center; justify-content: center;
-          gap: 10px;
-          padding: 10px 16px;
-          position: relative; z-index: 2;
+        .jr-chips {
+          display:flex;
+          gap:8px;
+          padding:20px;
+          flex-wrap:wrap;
         }
-        .j-break-text {
-          font-size: 12px; font-weight: 700;
-          color: #2a6fa8;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-        }
-        .j-break-timer { font-size: 13px; font-weight: 800; color: #1a4d7a; min-width: 36px; text-align: center; }
-        .j-btn-break {
-          background: rgba(42,111,168,0.14);
-          border: 1px solid rgba(42,111,168,0.28);
-          border-radius: 20px;
-          padding: 4px 12px;
-          font-size: 11px; font-weight: 700;
-          color: #1a4d7a; cursor: pointer;
-          font-family: inherit;
-          transition: background 0.15s;
-        }
-        .j-btn-break:hover { background: rgba(42,111,168,0.25); }
 
+        .jr-chip {
+          border:none;
+          border-radius:20px;
+          padding:6px 14px;
+          cursor:pointer;
+        }
 
-        /* Search bar */
-        .j-search {
-          margin: 4px 16px 8px;
-          display: flex; align-items: center; gap: 8px;
-          background: rgba(255,255,255,0.52);
-          border: 1px solid rgba(255,255,255,0.85);
-          border-radius: 12px;
-          padding: 8px 12px;
-          position: relative; z-index: 2;
-          color: #6fa8cc;
+        .jr-chip.on {
+          background:#1a5a8a;
+          color:white;
         }
-        .j-search input {
-          background: none; border: none; outline: none;
-          font-size: 13px; color: #1a3d5c;
-          width: 100%; font-family: inherit;
-        }
-        .j-search input::placeholder { color: #7ab4d4; }
 
+        .jr-ta {
+          width:calc(100% - 32px);
+          margin:0 16px;
+          height:120px;
+          border:none;
+          border-radius:16px;
+          padding:14px;
+          resize:none;
+        }
 
-        /* Entries */
-        .j-entries { padding: 4px 16px 100px; position: relative; z-index: 2; }
-        .j-entries-label {
-          font-size: 11px; font-weight: 700;
-          color: #5a94c0;
-          letter-spacing: 0.07em;
-          text-transform: uppercase;
-          margin-bottom: 10px; padding-left: 2px;
+        .jr-savebtn {
+          margin:16px;
+          width:calc(100% - 32px);
+          padding:14px;
+          border:none;
+          border-radius:14px;
+          background:#1a5a8a;
+          color:white;
+          font-weight:700;
         }
-        .j-entry-card {
-          background: rgba(255,255,255,0.62);
-          border: 1px solid rgba(255,255,255,0.88);
-          border-radius: 18px;
-          padding: 12px 14px;
-          margin-bottom: 10px;
-          animation: slideIn 0.2s ease;
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .j-entry-top {
-          display: flex; justify-content: space-between; align-items: center;
-          margin-bottom: 6px;
-        }
-        .j-entry-date { font-size: 11px; font-weight: 700; color: #5a94c0; letter-spacing: 0.04em; }
-        .j-mood-tag {
-          font-size: 10px;
-          background: rgba(42,111,168,0.12);
-          color: #1a4d7a;
-          border-radius: 10px;
-          padding: 2px 9px; font-weight: 700;
-        }
-        .j-entry-text { font-size: 13px; color: #1a3d5c; line-height: 1.55; }
-        .j-entry-actions { display: flex; gap: 6px; margin-top: 9px; }
-        .j-btn-edit, .j-btn-del {
-          display: flex; align-items: center; gap: 4px;
-          background: none;
-          border-radius: 10px;
-          padding: 4px 12px;
-          font-size: 11px; font-weight: 600;
-          cursor: pointer;
-          font-family: inherit;
-          transition: background 0.15s;
-        }
-        .j-btn-edit { color: #2a6fa8; border: 1px solid rgba(42,111,168,0.25); }
-        .j-btn-edit:hover { background: rgba(42,111,168,0.1); }
-        .j-btn-del { color: #c05050; border: 1px solid rgba(192,80,80,0.25); }
-        .j-btn-del:hover { background: rgba(192,80,80,0.08); }
 
+        .jr-ecard {
+          background:white;
+          margin:10px 16px;
+          padding:14px;
+          border-radius:16px;
+        }
 
-        /* Navbar */
-        .j-navbar {
-          position: fixed;
-          bottom: 0; left: 0; right: 0;
-          display: flex; justify-content: space-around;
-          padding: 12px 0 18px;
-          background: rgba(220,238,252,0.88);
-          border-top: 1px solid rgba(255,255,255,0.8);
-          backdrop-filter: blur(8px);
-          z-index: 5;
+        .chat-overlay {
+          position:fixed;
+          inset:0;
+          background:rgba(0,0,0,.4);
+          display:flex;
+          align-items:flex-end;
+          z-index:100;
         }
-        .j-nav-item {
-          display: flex; flex-direction: column; align-items: center; gap: 3px;
-          font-size: 10px; font-weight: 600;
-          color: #5a94c0; cursor: pointer;
-        }
-        .j-nav-item.active { color: #1a4d7a; }
 
+        .chat-modal {
+          width:100%;
+          height:78vh;
+          background:white;
+          border-radius:24px 24px 0 0;
+          display:flex;
+          flex-direction:column;
+        }
 
-        /* Modal overlay */
-        .j-modal-overlay {
-          position: fixed; inset: 0;
-          background: rgba(20,60,100,0.32);
-          z-index: 20;
-          display: flex; align-items: flex-end; justify-content: center;
-          padding-bottom: 24px;
-          animation: fadeIn 0.15s ease;
+        .chat-header {
+          display:flex;
+          justify-content:space-between;
+          padding:16px;
+          border-bottom:1px solid #ddd;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .j-modal {
-          background: rgba(228,243,255,0.97);
-          border: 1.5px solid rgba(255,255,255,0.92);
-          border-radius: 24px;
-          padding: 22px 18px;
-          width: calc(100% - 32px);
-          max-width: 420px;
-          animation: slideUp 0.2s ease;
+
+        .chat-messages {
+          flex:1;
+          overflow-y:auto;
+          padding:16px;
+          display:flex;
+          flex-direction:column;
+          gap:10px;
         }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .j-modal-title { font-size: 15px; font-weight: 800; color: #1a4d7a; margin-bottom: 14px; }
-        .j-modal-btns { display: flex; gap: 8px; margin-top: 12px; }
-        .j-btn-confirm {
-          flex: 1; background: #2a6fa8; color: white;
-          border: none; border-radius: 13px; padding: 11px;
-          font-size: 13px; font-weight: 700;
-          cursor: pointer; font-family: inherit;
+
+        .chat-bubble {
+          max-width:80%;
+          padding:10px 14px;
+          border-radius:16px;
         }
-        .j-btn-confirm:hover { background: #1a4d7a; }
-        .j-btn-cancel {
-          flex: 1;
-          background: rgba(90,148,192,0.13);
-          color: #2a6fa8;
-          border: 1px solid rgba(90,148,192,0.3);
-          border-radius: 13px; padding: 11px;
-          font-size: 13px; font-weight: 700;
-          cursor: pointer; font-family: inherit;
+
+        .chat-bubble.user {
+          background:#1a5a8a;
+          color:white;
+          align-self:flex-end;
         }
-        .j-btn-cancel:hover { background: rgba(90,148,192,0.22); }
-        .j-menu-row {
-          display: flex; align-items: center; gap: 12px;
-          background: rgba(255,255,255,0.5);
-          border: 1px solid rgba(255,255,255,0.85);
-          border-radius: 13px;
-          padding: 11px 14px;
-          cursor: pointer;
-          font-size: 14px; font-weight: 600;
-          color: #1a4d7a; margin-bottom: 7px;
-          transition: background 0.15s;
+
+        .chat-bubble.therapist {
+          background:#eef7ff;
         }
-        .j-menu-row:hover { background: rgba(255,255,255,0.75); }
-        .j-menu-row.danger { color: #c05050; }
-        .j-menu-row.danger:hover { background: rgba(192,80,80,0.07); }
-        .j-empty {
-          text-align: center; font-size: 13px;
-          color: #6fa8cc; padding: 20px 0;
+
+        .chat-input-row {
+          display:flex;
+          gap:8px;
+          padding:12px;
+        }
+
+        .chat-input {
+          flex:1;
+          padding:12px;
+          border-radius:20px;
+          border:1px solid #ccc;
+        }
+
+        .chat-send {
+          width:42px;
+          height:42px;
+          border:none;
+          border-radius:50%;
+          background:#1a5a8a;
+          color:white;
         }
       `}</style>
 
-
-      <div className="journal-root">
-        {/* Clouds */}
-        <div className="cloud-shape cloud-a" />
-        <div className="cloud-shape cloud-b" />
-        <div className="cloud-shape cloud-c" />
-
-
-        {/* Header */}
-        <div className="j-header">
-          <button className="j-icon-btn" aria-label="Back">
+      <div className="jr">
+        {/* HEADER */}
+        <div className="jr-hdr">
+          <button
+            className="jr-ibtn"
+            onClick={() =>
+              dispatch({ type: 'SET_SCREEN', screen: 'planner' })
+            }
+          >
             <ArrowLeftIcon />
           </button>
+
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="j-icon-btn" onClick={() => setLocked(l => !l)} aria-label="Toggle lock">
+            <button
+              className="jr-ibtn"
+              onClick={() => setShowChat(true)}
+            >
+              <ChatIcon />
+
+              {unreadCount > 0 && (
+                <span className="jr-chat-badge">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              className="jr-ibtn"
+              onClick={() => setLocked(v => !v)}
+            >
               {locked ? <LockIcon /> : <LockOpenIcon />}
             </button>
-            <button className="j-icon-btn" onClick={() => setShowMenu(true)} aria-label="Menu">
+
+            <button
+              className="jr-ibtn"
+              onClick={() => setShowMenu(true)}
+            >
               <DotsIcon />
             </button>
           </div>
         </div>
 
-
-        {/* Title */}
-        <div className="j-title">Reflection<br />Journal</div>
-
-
-        {/* Mood prompt */}
-        <div className="j-mood-row">
-          <SunIcon /> How are you feeling today?
+        <div className="jr-title">
+          Reflection
+          <br />
+          Journal
         </div>
 
+        <div style={{ padding: '20px' }}>
+          <SunIcon />
+        </div>
 
-        {/* Mood chips */}
-        <div className="j-mood-chips">
+        <div className="jr-chips">
           {MOODS.map(m => (
             <button
               key={m}
-              className={`j-mood-chip${selectedMood === m ? ' active' : ''}`}
+              className={`jr-chip ${selectedMood === m ? 'on' : ''}`}
               onClick={() => setSelectedMood(m)}
             >
               {m}
@@ -639,171 +662,129 @@ export default function JournalScreen() {
           ))}
         </div>
 
+        <textarea
+          className="jr-ta"
+          value={text}
+          disabled={locked}
+          onChange={e => setText(e.target.value)}
+        />
 
-        {/* Streak badges */}
-        <div className="j-streak-row">
-          <div className="j-badge">
-            <FlameIcon /> {Math.min(entries.length, 3)} day streak
-          </div>
-          <div className="j-badge">
-            <BookIcon /> {entries.length} {entries.length === 1 ? 'entry' : 'entries'}
-          </div>
-        </div>
+        <button className="jr-savebtn" onClick={saveEntry}>
+          Save Entry
+        </button>
 
-
-        {/* Lock banner */}
-        {locked && (
-          <div className="j-lock-banner">
-            <LockIcon /> Journal is locked — unlock to write
-          </div>
-        )}
-
-
-        {/* Textarea */}
-        <div className="j-textarea-wrap">
-          <textarea
-            className="j-textarea"
-            placeholder="Type here..."
-            value={text}
-            disabled={locked}
-            onChange={e => {
-              if (e.target.value.length <= MAX_CHARS) setText(e.target.value)
-            }}
-          />
-          <div className={`j-char-count${text.length > 250 ? ' warn' : ''}`}>
-            {text.length} / {MAX_CHARS}
-          </div>
-        </div>
-
-
-        {/* Save */}
-        <div className="j-btn-row">
-          <button
-            className="j-btn-save"
-            disabled={locked || !text.trim()}
-            onClick={saveEntry}
-          >
-            Save Entry
-          </button>
-        </div>
-
-
-        {/* Break banner */}
-        <div className="j-break-banner">
-          <MoonIcon style={{ color: '#2a6fa8' }} />
-          <span className="j-break-text">Take a break</span>
-          {breakActive && (
-            <span className="j-break-timer">{formatBreak(breakSeconds)}</span>
-          )}
-          <button className="j-btn-break" onClick={toggleBreak}>
-            {breakActive ? 'Stop' : 'Start'}
-          </button>
-          <MoonIcon style={{ color: '#2a6fa8' }} />
-        </div>
-
-
-        {/* Search */}
-        <div className="j-search">
-          <SearchIcon />
+        <div style={{ padding: '0 16px 16px' }}>
           <input
-            type="text"
-            placeholder="Search past entries..."
+            placeholder="Search entries..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: 12,
+              border: 'none'
+            }}
           />
         </div>
 
+        {sorted.map(entry => (
+          <div key={entry.id} className="jr-ecard">
+            <div style={{ fontWeight: 700 }}>{entry.mood}</div>
 
-        {/* Entries */}
-        <div className="j-entries">
-          <div className="j-entries-label">Past Entries</div>
-          {filtered.length === 0 ? (
-            <div className="j-empty">No entries yet</div>
-          ) : (
-            filtered.map(entry => (
-              <div key={entry.id} className="j-entry-card">
-                <div className="j-entry-top">
-                  <span className="j-entry-date">{entry.date}</span>
-                  <span className="j-mood-tag">{entry.mood}</span>
-                </div>
-                <div className="j-entry-text">{entry.text}</div>
-                <div className="j-entry-actions">
-                  <button className="j-btn-edit" onClick={() => openEdit(entry)}>
-                    <PencilIcon /> Edit
-                  </button>
-                  <button className="j-btn-del" onClick={() => deleteEntry(entry.id)}>
-                    <TrashIcon /> Delete
-                  </button>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+            <div style={{ marginTop: 8 }}>
+              {entry.text}
+            </div>
 
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                marginTop: 12
+              }}
+            >
+              <button
+                onClick={() => {
+                  setEditTarget(entry)
+                  setEditText(entry.text)
+                }}
+              >
+                Edit
+              </button>
 
-        {/* Navbar */}
-        <nav className="j-navbar">
-          <div className="j-nav-item">
-            <CalendarIcon /> <span>Planner</span>
-          </div>
-          <div className="j-nav-item">
-            <TargetIcon /> <span>Focus</span>
-          </div>
-          <div className="j-nav-item active">
-            <NotebookIcon /> <span>Journal</span>
-          </div>
-        </nav>
-
-
-        {/* Edit modal */}
-        {editId !== null && (
-          <div className="j-modal-overlay" onClick={() => setEditId(null)}>
-            <div className="j-modal" onClick={e => e.stopPropagation()}>
-              <div className="j-modal-title">Edit Entry</div>
-              <div className="j-textarea-wrap" style={{ margin: 0 }}>
-                <textarea
-                  className="j-textarea"
-                  style={{ height: 100 }}
-                  value={editText}
-                  onChange={e => setEditText(e.target.value)}
-                />
-              </div>
-              <div className="j-modal-btns">
-                <button className="j-btn-cancel" onClick={() => setEditId(null)}>Cancel</button>
-                <button className="j-btn-confirm" onClick={confirmEdit}>Save</button>
-              </div>
+              <button
+                onClick={() => setDeleteTarget(entry)}
+              >
+                Delete
+              </button>
             </div>
           </div>
-        )}
+        ))}
 
+        {/* CHAT */}
+        {showChat && (
+          <div
+            className="chat-overlay"
+            onClick={() => setShowChat(false)}
+          >
+            <div
+              className="chat-modal"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="chat-header">
+                <div>
+                  <div style={{ fontWeight: 800 }}>
+                    🌿 Sage
+                  </div>
 
-        {/* Menu modal */}
-        {showMenu && (
-          <div className="j-modal-overlay" onClick={() => setShowMenu(false)}>
-            <div className="j-modal" onClick={e => e.stopPropagation()}>
-              <div className="j-modal-title">Options</div>
+                  <div style={{ fontSize: 12 }}>
+                    Wellness Companion
+                  </div>
+                </div>
 
-
-              <div className="j-menu-row" onClick={() => { setLocked(l => !l); setShowMenu(false) }}>
-                {locked ? <LockOpenIcon /> : <LockIcon />}
-                {locked ? 'Unlock Journal' : 'Lock Journal'}
+                <button
+                  className="jr-ibtn"
+                  onClick={() => setShowChat(false)}
+                >
+                  <XIcon />
+                </button>
               </div>
 
+              <div className="chat-messages">
+                {chatMessages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={`chat-bubble ${msg.role}`}
+                  >
+                    {msg.text}
+                  </div>
+                ))}
 
-              <div className="j-menu-row" onClick={() => { toggleSort(); setShowMenu(false) }}>
-                <SearchIcon />
-                Sort: {sortAsc ? 'Oldest first' : 'Newest first'}
+                {chatLoading && (
+                  <div className="chat-bubble therapist">
+                    Typing...
+                  </div>
+                )}
+
+                <div ref={chatEndRef} />
               </div>
 
+              <div className="chat-input-row">
+                <input
+                  className="chat-input"
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e =>
+                    e.key === 'Enter' &&
+                    sendChatMessage()
+                  }
+                />
 
-              <div className="j-menu-row danger" onClick={() => { setEntries([]); setShowMenu(false) }}>
-                <TrashIcon />
-                Clear All Entries
-              </div>
-
-
-              <div className="j-modal-btns">
-                <button className="j-btn-cancel" onClick={() => setShowMenu(false)}>Close</button>
+                <button
+                  className="chat-send"
+                  onClick={sendChatMessage}
+                >
+                  <SendIcon />
+                </button>
               </div>
             </div>
           </div>

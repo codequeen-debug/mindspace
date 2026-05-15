@@ -77,11 +77,7 @@ export default function StatusBar() {
   const batteryFillWidth = Math.round(battery.level * 18) // max 18px inside the rect
 
   return (
-<<<<<<< HEAD
-    <div className="status-bar">
-=======
     <div className="status-bar" data-testid="status-bar">
->>>>>>> main
       <span>{time}</span>
       <div className="status-icons">
 
