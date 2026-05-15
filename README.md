@@ -7,7 +7,7 @@ College students often experience overwhelming levels of stress, anxiety, and di
 ---
 ## Motivation / User Story
 ### User Story
-**Derrick** is a college student who feels mentally scattered and overwhelmed during busy academic periods. Between assignments, exams, and personal stress, he struggles to stay organised and frequently feels emotionally drained. After repeatedly reaching out to his Resident Assistant (**Rich-Ann**) for support, a solution was imagined: an app that combines organisation, reflection, and wellness into one calming experience.
+**Derrick** is a college student who feels mentally scattered and overwhelmed during busy academic periods. Between assignments, exams, and personal stress, he struggles to stay organised and frequently feels emotionally drained. After repeatedly reaching out to his Resident Assistant (**Rich-Ann**) for support, a solution emerged: an app that combines organisation, reflection, and wellness into a single calming experience.
 **MindSpace helps students like Derrick manage academic responsibilities while promoting mental wellness and healthy habits.**
 
 ---
@@ -39,43 +39,59 @@ MindSpace is designed for:
 - Global state via React `useReducer` + Context API
 
 ## Setup
-
 ```bash
 npm install
 npm run dev
 ```
-
 Then open http://localhost:5173
 
 ## Build
-
 ```bash
 npm run build
 npm run preview
 ```
 
 ## Project Structure
-
-```
 src/
-├── main.jsx              # Entry point
-├── App.jsx               # Shell + routing
-├── index.css             # Design tokens + global styles
+├── main.jsx             # Application entry point
+├── App.jsx              # Main shell, providers, and routing logic
+├── index.css            # Global design tokens and styles
+├── StatusBar.test.jsx   # Unit tests for core components
 ├── store/
-│   └── store.jsx         # useReducer state + StoreContext
-├── components/
+│   └── store.jsx        # Global state management (useReducer + Context API)
+├── components/          # Reusable UI components
 │   ├── StatusBar.jsx
 │   └── BottomNav.jsx
-└── pages/
-    ├── HomeScreen.jsx
-    ├── PlannerScreen.jsx
-    ├── FocusScreen.jsx
-    └── JournalScreen.jsx
-```
+├── pages/               # Top-level route views
+│   ├── HomeScreen.jsx
+│   ├── PlannerScreen.jsx
+│   ├── FocusScreen.jsx
+│   └── JournalScreen.jsx
+└── data/                # Static data and local assets
+    └── journalEntries.jsx
 
+## System Architecture
+MindSpace uses a **Firebase Backend-as-a-Service (BaaS)** architecture.
+
+### Why Firebase?
+We selected Firebase because:
+- It provides **real-time database updates**
+- Simplifies backend setup and deployment
+- Reduces server management complexity
+- Supports scalability for student users
+- Enables future authentication and notifications
+
+### Architecture
+User Interface (React + Vite)
+            ↓
+     Firebase Firestore
+            ↓
+     Real-Time Data Updates
+            ↓
+ Journals / Tasks / User Data
+ 
 ## Design System
-
-Colors, spacing, and typography are all defined as CSS custom properties in `index.css`.
+Colours, spacing, and typography are all defined as CSS custom properties in `index.css`.
 The palette matches the prototype: light steel blue (`#7fafc4`) primary, muted teal navbar,
 lavender calendar accent (`#9b8ec4`), and dark modals (`#2e2e3e`).
 
